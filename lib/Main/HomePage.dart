@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:twenty_four_hours/Authentication/Model/Register.dart';
 import 'package:twenty_four_hours/Authentication/UI/WelcomePage.dart';
@@ -23,6 +26,7 @@ import 'package:twenty_four_hours/Main/main.dart';
 import 'package:speech_bubble/speech_bubble.dart';
 import 'package:twenty_four_hours/Main/DisplayAchivement.dart';
 import 'package:twenty_four_hours/NavigationControl.dart';
+import 'package:twenty_four_hours/Widgets-Assets/24HColors.dart';
 class HomePage extends StatefulWidget {
   final VoidCallback onSignedOut;
   final Setting setting;
@@ -45,11 +49,43 @@ class HomePage extends StatefulWidget {
 
   FirebaseUser user;
 }
+enum AppBarBehavior { normal, pinned, floating, snapping }
 
-class HomePagestate extends State<HomePage> {
+class HomePagestate extends State<HomePage> with TickerProviderStateMixin{
+ ///Variables here///////////////
   String currentUser = '';
   String result="";
   Setting setting;
+  DateTime dateTime;
+  TabController _tabController;
+  AnimationController _controller;
+  Timer _timer;
+  String greetingMsg;
+  String dayProgress;
+  double startAt;
+  String hbotMsg = '...', hbotImg = 'images/hbot.png';
+  String dayAnimation='';
+  String weatherAnim='';
+  var _scrollController = new ScrollController();
+  AppBarBehavior _appBarBehavior = AppBarBehavior.normal;
+  var stops = [0.3, 0.6, 0.9];
+  Color deepShade = new Color.fromRGBO(153, 230, 255, 1.0),
+      mediumShade = new Color.fromRGBO(204, 242, 255, 1.0),
+      shallowShade = new Color.fromRGBO(255, 255, 255, 1.0);
+  bool isMorning = true;
+  String currentTime = new DateFormat.Hm().format(new DateTime.now()),
+      currentDate = new DateFormat.yMMMEd().format(new DateTime.now());
+  final double _appBarHeight = 256.0;
+
+  List<Widget> displays=[Text("Main"),Text("Weather"),Text("Schedule")];
+  ///end///
+  Future updateTime() async {
+    DateTime date = await DateTime.now();
+    // print(date);
+    setState(() {
+      currentTime = new DateFormat.Hms().format(date);
+    });
+  }
   HomePagestate({this.setting});
   Widget app=WaitingScreen();
   @override
@@ -57,27 +93,100 @@ class HomePagestate extends State<HomePage> {
     // TODO: implement build
 
           app= Scaffold(
-          
+              backgroundColor: Theme.of(context).backgroundColor,
 
-            appBar: AppBar(title: Text(user.displayName), actions: <Widget>[
-              IconButton(icon: Icon(Icons.settings), onPressed: () {
-                NavigationControl(nextPage:new SettingsPage(
-                user: userInfo,
-                setting:setting)).navTo(context);})
-              
-            ]),
-            body: ListView(children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Container(
-                    child: Text(result),
-                    decoration:
-                        BoxDecoration(border: Border.all(color: Colors.white)),
-                    height: 300,
-                    padding: const EdgeInsets.all(10.0),
-                  )),
-              Align(alignment: Alignment.bottomCenter, child: AddTool())
-            ]));
+            body: new NestedScrollView(
+              controller: _scrollController,
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  new SliverAppBar(
+                    backgroundColor: deepShade,
+                    expandedHeight: _appBarHeight,
+                    pinned: _appBarBehavior == AppBarBehavior.pinned,
+                    floating: _appBarBehavior == AppBarBehavior.floating ||
+                        _appBarBehavior == AppBarBehavior.snapping,
+                    snap: _appBarBehavior == AppBarBehavior.snapping,
+                    actions: <Widget>[
+
+                      new IconButton(
+                        icon: Icon(Icons.chat_bubble_outline),
+                        onPressed: () {},
+                      ),
+                      IconButton(icon: Icon(Icons.settings), onPressed: () {
+                        setting.loadSettings().then((s){
+                          NavigationControl(nextPage:new SettingsPage(
+                              user: userInfo,
+                              setting:setting)).navTo(context);});}),
+                    ],
+                    flexibleSpace: new FlexibleSpaceBar(
+                      title: new Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[],
+                      ),
+                      background: new Stack(
+                        fit: StackFit.expand,
+                        children: <Widget>[
+                          // This gradient ensures that the toolbar icons are distinct
+
+                          // against the background image.
+
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                stops: stops,
+                                colors: <Color>[
+                                  deepShade,
+                                  mediumShade,
+                                  shallowShade
+                                ],
+                              ),
+                            ),
+                          ),
+
+                    /*     new Transform.translate(
+                            offset: new Offset(0.0, 100.0),
+                            child: new Image(
+                              image: new AssetImage(bgImg),
+                              fit: BoxFit.scaleDown,
+                              height: 70.0,
+                              width: 90.0,
+                            ),
+                          ),
+                            new Transform.translate(
+                            offset: new Offset(0.0, 10.0),
+                            child: new Image(
+                              image: new AssetImage(weatherImg),
+                              fit: BoxFit.scaleDown,
+                              height: 70.0,
+                              width: 90.0,
+                            ),
+                          ),*/
+                           TabBarView(
+                        controller: _tabController,
+                        children: displays.map((Widget choice) {
+                          return Padding(
+                            padding: EdgeInsets.zero,
+                            child: ChoiceCard(
+                              tabController: _tabController,
+                              currentTime: currentTime,
+                              currentDate: currentDate,
+                              choice: choice,
+                              isMorning: isMorning,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ];
+              },
+              body: ListTile(),
+            ),);
 
     return app;
        
@@ -86,9 +195,106 @@ class HomePagestate extends State<HomePage> {
   StreamSubscription _subscription;
     StreamSubscription _profileSubscription;
     UserInformationDB userInfoDB;
+  void glistener()
+  {
+    if (!_controller.isAnimating) {
+      if (_controller.isCompleted) {
+        _controller.reverse();
+      } else {
+        _controller.forward();
+      }
+    }
+  }
+  void _nextPage(int delta) {
+    final int newIndex = _tabController.index + delta;
+    if (newIndex < 0 || newIndex >= _tabController.length) return;
+    _tabController.animateTo(newIndex);
+  }
+
+  num rndNumber(num min, num max) {
+    return new Random().nextInt(max - min + 1) + min;
+  }
+
+  void setTime(Timer timer) {
+
+    final greetings = [
+      userInfo!=null?"Good Morning ${userInfo.username}":"Good Morning",
+      "Good Afternoon",
+      "It\'s Going to be a beautiful day today",
+      "Good Evening",
+      "Night Night! "
+    ];
+    setState(() {
+
+      hbotMsg =  userInfo!=null?'Hey ${userInfo.username}':"Hey There!";
+      hbotImg = 'images/hbot.png';
+      dayProgress = '${100 - ((dateTime.hour * 100) / 24).round()}%';
+      startAt = ((dateTime.hour * 100) / 24) / 100;
+      //    print('hour: ${dateTime.hour} __ $dayProgress');
+      dateTime = new DateTime.now();
+      currentTime = new DateFormat.Hm().format(dateTime);
+      currentDate = new DateFormat.yMMMEd().format(dateTime);
+      // print("DateTime: ${dateTime.hour}");
+      if (dateTime.hour >= 1 && dateTime.hour <= 3) {
+      //  bgImg = 'images/mnight.png';
+        hbotImg = 'assets/gifs/hbot_sleep.gif';
+        deepShade = new Color.fromRGBO(80, 0, 179, 1.0);
+        mediumShade = new Color.fromRGBO(133, 51, 255, 1.0);
+        shallowShade = new Color.fromRGBO(198, 26, 255, 1.0);
+        //stops=[0.4,0.6,1.0];
+        greetingMsg = greetings[4];
+        isMorning = false;
+      } else if (dateTime.hour >= 4 && dateTime.hour <= 6) {
+        greetingMsg = greetings[4];
+       // bgImg = 'images/mnight.png';
+        hbotImg = 'assets/gifs/hbot_sleep.gif';
+        deepShade = new Color.fromRGBO(0, 0, 102, 1.0);
+        mediumShade = new Color.fromRGBO(0, 51, 153, 1.0);
+        shallowShade = new Color.fromRGBO(51, 102, 153, 1.0);
+        //stops=[0.4,0.6,1.0];
+        isMorning = false;
+      } else if (dateTime.hour >= 7 && dateTime.hour <= 11) {
+        greetingMsg = greetings[0];
+        //bgImg = 'images/grass-outline-hi.png';
+        deepShade = new Color.fromRGBO(0, 204, 255, 1.0);
+        mediumShade = new Color.fromRGBO(102, 255, 204, 1.0);
+        shallowShade = new Color.fromRGBO(255, 255, 204, 1.0);
+        //stops=[0.4,0.6,1.0];
+        isMorning = true;
+      } else if (dateTime.hour >= 12 && dateTime.hour <= 17) {
+        greetingMsg = greetings[rndNumber(1, 2)];
+      //  bgImg = 'images/sea.png';
+        deepShade = new Color.fromRGBO(153, 230, 255, 1.0);
+        mediumShade = new Color.fromRGBO(204, 242, 255, 1.0);
+        shallowShade = new Color.fromRGBO(255, 255, 204, 1.0);
+        //stops=[0.4,0.6,1.0];
+        isMorning = true;
+      } else if (dateTime.hour >= 18 && dateTime.hour <= 19) {
+        greetingMsg = greetings[3];
+        //bgImg = 'images/sea.png';
+        shallowShade = new Color.fromRGBO(255, 102, 0, 1.0);
+        mediumShade = new Color.fromRGBO(255, 153, 153, 1.0);
+        deepShade = new Color.fromRGBO(255, 204, 153, 1.0);
+        //stops=[0.4,0.6,1.0];
+        isMorning = true;
+      } else {
+        greetingMsg = greetings[4];
+       // bgImg = 'images/night.png';
+        deepShade = new Color.fromRGBO(204, 0, 204, 1.0);
+        mediumShade = new Color.fromRGBO(255, 102, 153, 1.0);
+        shallowShade = new Color.fromRGBO(255, 166, 77, 1.0);
+        //stops=[0.4,0.6,1.0];
+        isMorning = true;
+      }
+    });
+  }
   @override
   void initState() {
-     
+    _controller=new AnimationController(vsync: this,duration: Duration(seconds: 30));
+    _controller.addListener((){glistener();});
+    _tabController = TabController(vsync: this, length: displays.length);
+    _timer = new Timer.periodic(const Duration(seconds: 1), setTime);
+    initializeDateFormatting();
     _currentUser();
     print("THEME: ${setting.theme}");
     for (int i = 0; i < 7; i++) controllers.add(new TextEditingController());
@@ -234,5 +440,72 @@ class HomePagestate extends State<HomePage> {
           userInfo=reg;
         });
         
+  }
+}
+
+class ChoiceCard extends StatelessWidget {
+  const ChoiceCard(
+      {this.tabController,
+        this.currentTime,
+        this.currentDate,
+        Key key,
+        this.choice,
+        this.isMorning})
+      : super(key: key);
+
+  final Widget choice;
+
+  final String currentTime;
+  final String currentDate;
+  final bool isMorning;
+  final TabController tabController;
+
+  @override
+  Widget build(BuildContext context) {
+    final TextStyle textStyle = Theme.of(context).textTheme.display1;
+    return Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        choice,
+        new Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            new Container(
+              height: 48.0,
+              alignment: Alignment.center,
+              child: TabPageSelector(
+                controller: tabController,
+                color: Colors.black12,
+                selectedColor: Colors.black54,
+              ),
+            ),
+            new Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                new Text(
+                  currentTime,
+                  style: new TextStyle(
+                    color: isMorning
+                        ? HColors.midnightTextSecnodary
+                        : HColors.midnightTextPrimary,
+                    fontFamily: 'ExoBold',
+                    fontSize: 44.0,
+                  ),
+                ),
+                new Text(
+                  currentDate,
+                  style: new TextStyle(
+                    color: isMorning ? Colors.black45 : Colors.indigoAccent,
+                    fontFamily: 'ExoBold',
+                    fontSize: 16.0,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

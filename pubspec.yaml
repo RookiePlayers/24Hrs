@@ -38,6 +38,14 @@ dependencies:
   uuid:
   speech_bubble:
   animated_background:
+  json_annotation:
+  simple_coverflow:
+  sensors:
+  share:
+  platform:
+  meta:
+  fluttie:
+  uni_links:
   dynamic_theme:
     git:
       url: git://github.com/Norbert515/dynamic_theme.git
