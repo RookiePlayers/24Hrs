@@ -25,8 +25,12 @@ import 'package:twenty_four_hours/Main/DisplayAchivement.dart';
 import 'package:twenty_four_hours/NavigationControl.dart';
 class HomePage extends StatefulWidget {
   final VoidCallback onSignedOut;
-  HomePage({this.onSignedOut});
-  HomePagestate createState() => HomePagestate();
+  final Setting setting;
+  final String title;
+
+  HomePage({Key key,this.title,this.onSignedOut,this.setting}) : super(key: key);
+  HomePagestate createState() => HomePagestate(setting:setting);
+
   void _signOut(BuildContext context) async {
     try {
       var auth = AuthProvider.of(context).auth;
@@ -46,25 +50,15 @@ class HomePagestate extends State<HomePage> {
   String currentUser = '';
   String result="";
   Setting setting;
+  HomePagestate({this.setting});
   Widget app=WaitingScreen();
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-  setting=new Setting(
-                 
-                fontfamily: 'Exo',
-                );
-    setting.loadSettings().then((c){
-      Themes.changeTheme(setting.theme,context);
-      setState(() {
+
           app= Scaffold(
           
-            floatingActionButton: FloatingActionButton(
-              child: Icon(Icons.send),
-              onPressed: () {
-                _saveExercise();
-              },
-            ),
+
             appBar: AppBar(title: Text(user.displayName), actions: <Widget>[
               IconButton(icon: Icon(Icons.settings), onPressed: () {
                 NavigationControl(nextPage:new SettingsPage(
@@ -84,7 +78,7 @@ class HomePagestate extends State<HomePage> {
                   )),
               Align(alignment: Alignment.bottomCenter, child: AddTool())
             ]));
-        });});
+
     return app;
        
   }
@@ -96,6 +90,7 @@ class HomePagestate extends State<HomePage> {
   void initState() {
      
     _currentUser();
+    print("THEME: ${setting.theme}");
     for (int i = 0; i < 7; i++) controllers.add(new TextEditingController());
     eh = new ExcersiseHandling();
     wh=new WorkoutDBHandling();

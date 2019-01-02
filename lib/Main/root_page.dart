@@ -4,10 +4,13 @@ import 'package:twenty_four_hours/Authentication/UI/LoginPage.dart';
 import 'package:twenty_four_hours/Authentication/auth_provider.dart';
 import 'package:twenty_four_hours/Main/HomePage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:twenty_four_hours/Main/Settings/Setting.dart';
 
 class RootPage extends StatefulWidget {
+  final Setting setting;
+  RootPage({this.setting});
   @override
-  State<StatefulWidget> createState() => _RootPageState();
+  State<StatefulWidget> createState() => _RootPageState(setting: setting);
 }
 
 enum AuthStatus {
@@ -19,18 +22,20 @@ enum AuthStatus {
 class _RootPageState extends State<RootPage> {
   AuthStatus authStatus = AuthStatus.notDetermined;
 
+  final Setting setting;
+  _RootPageState({this.setting});
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     var auth = AuthProvider.of(context).auth;
-    
-   
+
+
 
     auth.currentUser().then((userId) {
       setState(() {
         authStatus =
-            userId == null ? AuthStatus.notSignedIn : AuthStatus.signedIn;
+        userId == null ? AuthStatus.notSignedIn : AuthStatus.signedIn;
       });
     });
   }
@@ -61,6 +66,7 @@ class _RootPageState extends State<RootPage> {
       case AuthStatus.signedIn:
         return new HomePage(
           onSignedOut: _signedOut,
+          setting: setting,
         );
     }
 

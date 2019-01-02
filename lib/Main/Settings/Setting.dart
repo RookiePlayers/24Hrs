@@ -198,7 +198,20 @@ class Setting
       
     }catch(e){
        contents='';
-       print('error opening file');
+       print('creating file..');
+       theme=THEMETYPE.MIDNIGHT;
+        fontfamily='jua';
+        notification=false;
+        gym_notification=false;
+        social_notification=false;
+        edu_notification=false;
+        downloadToLocal=false;
+        appearOnline=false;
+        location=false;
+        gestures=false;
+        saveSettings();
+
+
     }
     parseString(contents);
   }

@@ -13,6 +13,7 @@ import 'package:twenty_four_hours/Main/HomePage.dart';
 import 'package:twenty_four_hours/Main/Settings/Setting.dart';
 import 'package:twenty_four_hours/Main/Settings/SettingsPage.dart';
 import 'package:twenty_four_hours/Main/root_page.dart';
+import 'package:twenty_four_hours/NavigationControl.dart';
 import 'package:twenty_four_hours/Widgets-Assets/24HColors.dart';
 import 'package:twenty_four_hours/Widgets-Assets/GraidentAnimator.dart';
 import 'package:dynamic_theme/dynamic_theme.dart';
@@ -29,7 +30,7 @@ class Themes {
     backgroundColor: HColors.midnight_main,
     scaffoldBackgroundColor: HColors.midnight_main,
     bottomAppBarColor: HColors.mainscreenDark,
-    
+
   );
   static final ThemeData DAYLIGHT = new ThemeData(
     brightness: Brightness.light,
@@ -58,24 +59,24 @@ class Themes {
   }
   static void changeTheme(THEMETYPE type,BuildContext context)
   {
-       switch(type)
+    switch(type)
     {
       case THEMETYPE.MIDNIGHT:
-      {
-        DynamicTheme.of(context).setThemeData(MIDNIGHT);
-        DynamicTheme.of(context).setBrightness(Brightness.light);
-      };
-      break;
+        {
+          DynamicTheme.of(context).setThemeData(MIDNIGHT);
+          DynamicTheme.of(context).setBrightness(Brightness.light);
+        };
+        break;
       case THEMETYPE.DAYLIGHT:
         {
-        DynamicTheme.of(context).setThemeData(DAYLIGHT);
-        DynamicTheme.of(context).setBrightness(Brightness.dark);
-      };break;
+          DynamicTheme.of(context).setThemeData(DAYLIGHT);
+          DynamicTheme.of(context).setBrightness(Brightness.dark);
+        };break;
       case THEMETYPE.EVENING:
         {
-        DynamicTheme.of(context).setThemeData(EVENING);
-        DynamicTheme.of(context).setBrightness(Brightness.dark);
-      };break;
+          DynamicTheme.of(context).setThemeData(EVENING);
+          DynamicTheme.of(context).setBrightness(Brightness.dark);
+        };break;
 
     }
   }
@@ -84,10 +85,10 @@ class WaitingScreen extends StatefulWidget
 {
   WaitingScreenState createState()=>new WaitingScreenState();
 }
-class WaitingScreenState extends State<WaitingScreen> with 
- SingleTickerProviderStateMixin 
+class WaitingScreenState extends State<WaitingScreen> with
+    SingleTickerProviderStateMixin
 {
- AnimationController _controller;
+  AnimationController _controller;
   @override
   void initState() {
     super.initState();
@@ -97,16 +98,16 @@ class WaitingScreenState extends State<WaitingScreen> with
     );
     _controller.addListener(glistener);
   }
- void glistener()
-{
-   if (!_controller.isAnimating) {
-   if (_controller.isCompleted) {
-     _controller.reverse();
+  void glistener()
+  {
+    if (!_controller.isAnimating) {
+      if (_controller.isCompleted) {
+        _controller.reverse();
       } else {
         _controller.forward();
-        }
-        }
-}
+      }
+    }
+  }
 
 
   @override
@@ -126,16 +127,16 @@ class WaitingScreenState extends State<WaitingScreen> with
             controller: _controller,
           ),
           Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children:<Widget>[
-            Container(
-              width: 150.0,
-              height:150.0,
-              child:FlareActor(
-            "Flare/dl.flr",fit: BoxFit.contain,animation: "start",
-                )),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children:<Widget>[
+                Container(
+                    width: 150.0,
+                    height:150.0,
+                    child:FlareActor(
+                      "Flare/dl.flr",fit: BoxFit.contain,animation: "start",
+                    )),
                 Text("Setting you up...",style: TextStyle(color: Colors.white,fontSize: 28.0,))
-                ]),
+              ]),
 
         ],
       ),
@@ -158,36 +159,37 @@ class HoursState extends State<Hours> {
   HoursState() {
     // Auth().signInWithEmailAndPassword("olamidepeters@gmail.com", "artiscool");
   }
-Widget app=new WaitingScreen();
+  Widget app=new WaitingScreen();
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     print("firebase starting...");
-  //  Setting setting=new Setting();
-   // setting.loadSettings().then((c){setState(() {
-          app=AuthProvider(
+    //  Setting setting=new Setting();
+    // setting.loadSettings().then((c){setState(() {
+    app=AuthProvider(
         auth: Auth(),
         child: new DynamicTheme(
-          defaultBrightness: Brightness.dark,
-          data: (brightness) =>Themes.MIDNIGHT,
-      themedWidgetBuilder: (context, theme) {
-        return new 
-          MaterialApp(
-          title: 'Flutter Demo',
-          theme:theme,
-          home:
-              new SplashScreen(), // user!=null ? HomePage():LoginActivityMain(),
-          routes: <String, WidgetBuilder>{
-            '/RootPage': (BuildContext context) => new RootPage()
-          },
-        );
-        }));
-       // });
-       // });
-    
+            defaultBrightness: Brightness.dark,
+            data: (brightness) =>Themes.MIDNIGHT,
+            themedWidgetBuilder: (context, theme) {
+              return new
+              MaterialApp(
+                title: 'Flutter Demo',
+                theme:theme,
+
+                home:
+                new SplashScreen(), // user!=null ? HomePage():LoginActivityMain(),
+                routes: <String, WidgetBuilder>{
+                  '/RootPage': (BuildContext context) => new RootPage()
+                },
+              );
+            }));
+    // });
+    // });
+
     return app;
   }
-  
+
 }
 
 class SplashScreen extends StatefulWidget {
@@ -198,14 +200,45 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   startTime() async {
-    var _duration = new Duration(seconds: 5);
-    return new Timer(_duration, navigationPage);
+    /*var _duration = new Duration(seconds: 5);
+    return new Timer(_duration, navigationPage);*/
+    Setting setting=Setting();
+
+    setting.loadSettings().then((n){
+      print("This is setting: ${setting.theme}");
+      switch(setting.theme)
+      {
+        case THEMETYPE.MIDNIGHT:
+          {
+            print("Midnight");
+            DynamicTheme.of(context).setThemeData(Themes.MIDNIGHT);
+
+          }
+          break;
+        case THEMETYPE.DAYLIGHT:
+          {
+            print("Its daylght");
+            DynamicTheme.of(context).setThemeData(Themes.DAYLIGHT);
+
+          }break;
+        case THEMETYPE.EVENING:
+          {
+            print("lol");
+            DynamicTheme.of(context).setThemeData(Themes.EVENING);
+
+          }break;
+
+      }
+
+      Future.delayed(Duration(seconds: 1)).then((n){
+        NavigationControl(nextPage: RootPage(setting: setting,)).replaceWith(context);
+      });});
   }
 
   AnimationController _controller;
 
   void navigationPage() {
-    Navigator.of(context).pushReplacementNamed('/RootPage');
+    //Navigator.of(context).pushReplacementNamed('/RootPage');
   }
 
   @override
@@ -216,41 +249,32 @@ class _SplashScreenState extends State<SplashScreen>
       duration: Duration(seconds: 7),
     );
     _controller.addListener(glistener);
-   startTime();
-   Setting settings=new Setting();
-   settings.loadSettings();print(settings.theme);
-   settings.theme=THEMETYPE.DAYLIGHT;
-  settings.fontfamily='jua';
-   settings.notification=true;
-   settings.gym_notification=true;
-   settings.social_notification=true;
-   settings.notification=false;
-    settings.downloadToLocal=true;
-   settings.appearOnline=false;
-   settings.location=true;
-   settings.gestures=true;
-   settings.saveSettings();
-   
+
+    startTime();
+
+
   }
-void glistener()
-{
-   if (!_controller.isAnimating) {
+  void glistener()
+  {
+    if (!_controller.isAnimating) {
 
-                  if (_controller.isCompleted) {
+      if (_controller.isCompleted) {
 
-                    _controller.reverse();
+        _controller.reverse();
 
-                  } else {
 
-                    _controller.forward();
+      } else {
 
-                  }
+        _controller.forward();
 
-                }
-}
+      }
+
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+
       body: new Stack(
         children: <Widget>[
           GradientAnimation(
@@ -264,17 +288,18 @@ void glistener()
             ),
             controller: _controller,
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children:<Widget>[
-            Container(
-              width: 150.0,
-              height:150.0,
-              child:FlareActor(
-            "Flare/dl.flr",fit: BoxFit.contain,animation: "start",
-                )),
+          Center(child:  Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children:<Widget>[
+                Container(
+                    width: 150.0,
+                    height:150.0,
+                    child:FlareActor(
+                      "Flare/dl.flr",fit: BoxFit.contain,animation: "start",
+                    )),
                 Text("Setting you up...",style: TextStyle(color: Colors.white,fontSize: 28.0,))
-                ]),
+              ])),
 
         ],
       ),
