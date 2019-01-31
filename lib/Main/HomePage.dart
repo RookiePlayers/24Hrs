@@ -27,6 +27,11 @@ import 'package:speech_bubble/speech_bubble.dart';
 import 'package:twenty_four_hours/Main/DisplayAchivement.dart';
 import 'package:twenty_four_hours/NavigationControl.dart';
 import 'package:twenty_four_hours/Widgets-Assets/24HColors.dart';
+import 'package:twenty_four_hours/Widgets-Assets/Polygon.dart';
+import 'package:twenty_four_hours/Widgets-Assets/auto_size_text.dart';
+import 'package:twenty_four_hours/Widgets-Assets/polygon_clipper.dart';
+import 'package:twenty_four_hours/Widgets-Assets/polygon_outline.dart';
+
 class HomePage extends StatefulWidget {
   final VoidCallback onSignedOut;
   final Setting setting;
@@ -75,7 +80,7 @@ class HomePagestate extends State<HomePage> with TickerProviderStateMixin{
   bool isMorning = true;
   String currentTime = new DateFormat.Hm().format(new DateTime.now()),
       currentDate = new DateFormat.yMMMEd().format(new DateTime.now());
-  final double _appBarHeight = 256.0;
+  final double _appBarHeight = 300.0;
 
   List<Widget> displays=[Text("Main"),Text("Weather"),Text("Schedule")];
   ///end///
@@ -185,7 +190,83 @@ class HomePagestate extends State<HomePage> with TickerProviderStateMixin{
                   ),
                 ];
               },
-              body: ListTile(),
+              body: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                        color:Colors.black26,
+                    ),
+                  ),
+
+                  new Transform.translate(
+                    offset: new Offset(MediaQuery.of(context).size.width*0.32, MediaQuery.of(context).size.height*0.06),
+                    child:
+                  HexagonFilled(
+                    new Container(
+                        child:new Column(
+                          children: <Widget>[
+                            Shimmer.fromColors(
+                              baseColor: Colors.redAccent,
+                              highlightColor: Colors.red.shade100,
+                              period: Duration(seconds: 2),
+                              child:new RaisedButton(onPressed: null),
+                            ),
+                            Padding(padding: const EdgeInsets.all(6.0)),
+
+                          ],
+                        )
+                    ),
+                    shadows: [PolygonBoxShadow(color:Colors.black87,elevation:10.0)],
+                    size: new Size(150.0,150.0),
+                    color: Colors.red,
+                  )),
+                  new Transform.translate(
+                      offset: new Offset(MediaQuery.of(context).size.width*0.02, MediaQuery.of(context).size.height*0.30),
+                      child:
+                      HexagonFilled(
+                        new Container(
+                            child:new Column(
+                              children: <Widget>[
+                                Shimmer.fromColors(
+                                  baseColor: Colors.yellowAccent,
+                                  highlightColor: Colors.yellow.shade100,
+                                  period: Duration(seconds: 2),
+                                  child:new RaisedButton(onPressed: null),
+                                ),
+                                Padding(padding: const EdgeInsets.all(6.0)),
+
+                              ],
+                            )
+                        ),
+                        size: new Size(150.0,150.0),
+                        color: Colors.yellow,
+                      )),
+                  new Transform.translate(
+                      offset: new Offset(MediaQuery.of(context).size.width*0.6, MediaQuery.of(context).size.height*0.30),
+                      child:
+                      HexagonFilled(
+                        new Container(
+                            child:new Column(
+                              children: <Widget>[
+                                Shimmer.fromColors(
+                                  baseColor: Colors.purpleAccent,
+                                  highlightColor: Colors.purple.shade100,
+                                  period: Duration(seconds: 2),
+                                  child:new RaisedButton(onPressed: null),
+                                ),
+                                Padding(padding: const EdgeInsets.all(6.0)),
+
+                              ],
+                            )
+                        ),
+                        size: new Size(150.0,150.0),
+                        color: Colors.purple,
+                      )),
+
+                ],
+              ),
             ),);
 
     return app;
@@ -467,23 +548,23 @@ class ChoiceCard extends StatelessWidget {
       fit: StackFit.expand,
       children: <Widget>[
         choice,
-        new Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            new Container(
+        Align(
+        alignment: Alignment.bottomCenter,
+          child:new Container(
               height: 48.0,
               alignment: Alignment.center,
               child: TabPageSelector(
                 controller: tabController,
                 color: Colors.black12,
                 selectedColor: Colors.black54,
-              ),
-            ),
+              )),
+        ),
             new Column(
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: <Widget>[
-                new Text(
+
+    /* new Text(
                   currentTime,
                   style: new TextStyle(
                     color: isMorning
@@ -492,7 +573,7 @@ class ChoiceCard extends StatelessWidget {
                     fontFamily: 'ExoBold',
                     fontSize: 44.0,
                   ),
-                ),
+                ),*/
                 new Text(
                   currentDate,
                   style: new TextStyle(
@@ -501,8 +582,7 @@ class ChoiceCard extends StatelessWidget {
                     fontSize: 16.0,
                   ),
                 ),
-              ],
-            ),
+
           ],
         ),
       ],
